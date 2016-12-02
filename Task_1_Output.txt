@@ -1,0 +1,1 @@
+Mean = 7010    Minimum = 10     Maximum = 707143844        Popular object : 330950210        Accessed 2400064 times      Hit-rate = 0.745589
