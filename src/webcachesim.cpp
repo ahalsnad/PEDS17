@@ -7,13 +7,14 @@
 #include <iostream>
 #include "policies/lru_variants.cpp"
 #include "policies/gd_variants.cpp"
+#include <chrono>
 
 class webcachesim {
 public:
     int cacheSim(int argc, char *argv[]) {
         // output help if insufficient params
         if (argc < 5) {
-            cerr << "webcachesim warmUp cacheType log2CacheSize traceFiles" << endl;
+            cerr << "webcachesim warmUp cacheType log2CacheSize cacheParams traceFiles" << endl;
             return 1;
         }
 
@@ -33,9 +34,27 @@ public:
         cout << "cache Size : " << cache_size;
         webcache->setSize(cache_size);
 
+
+        // parse cache parameters
+        regex opexp ("(.*)=(.*)");
+        cmatch opmatch;
+        string paramSummary;
+//  for(int i=5; i<argc; i++) {
+        regex_match (argv[4],opmatch,opexp);
+        if(opmatch.size()!=3) {
+            cerr << "each cacheParam needs to be in form name=value" << endl;
+            return 1;
+        }
+        webcache->setPar(opmatch[1], opmatch[2]);
+        paramSummary += opmatch[2];
+//  }
+
         ifstream infile;
         long long reqs = 0, bytes = 0;
         long long t, id, size;
+
+        // record start time
+        auto start = std::chrono::high_resolution_clock::now();
 
         cerr << "running..." << endl;
 
@@ -69,12 +88,19 @@ public:
             infile.close();
 
         }
+        // record end time
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = end-start;
+
+        long throughput = reqs/diff.count();
+
         cout << "done." << endl << "-------" << endl
-             << "FILE : " << argv[i] << endl
              << "cache policy: " << cacheType << endl
              << "size (log2): " << sizeExp << endl
              << "requests processed: " << reqs << endl
+             << "running time: " << diff.count() << endl
              << "object hit ratio: " << double(webcache->getHits()) / reqs << endl
-             << "byte hit ratio: " << double(webcache->getBytehits()) / bytes << endl;
+             << "byte hit ratio: " << double(webcache->getBytehits()) / bytes << endl
+             << "throughput: " << throughput << endl; //Task 3
     }
 };
