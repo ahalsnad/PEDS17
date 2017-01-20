@@ -36,12 +36,12 @@ public:
 
 
         // parse cache parameters
-        regex opexp ("(.*)=(.*)");
+        regex opexp("(.*)=(.*)");
         cmatch opmatch;
         string paramSummary;
 //  for(int i=5; i<argc; i++) {
-        regex_match (argv[4],opmatch,opexp);
-        if(opmatch.size()!=3) {
+        regex_match(argv[4], opmatch, opexp);
+        if (opmatch.size() != 3) {
             cerr << "each cacheParam needs to be in form name=value" << endl;
             return 1;
         }
@@ -90,9 +90,9 @@ public:
         }
         // record end time
         auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> diff = end-start;
+        std::chrono::duration<double> diff = end - start;
 
-        long throughput = reqs/diff.count();
+        long throughput = reqs / diff.count();
 
         cout << "done." << endl << "-------" << endl
              << "cache policy: " << cacheType << endl
