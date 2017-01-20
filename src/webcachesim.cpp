@@ -102,5 +102,9 @@ public:
              << "object hit ratio: " << double(webcache->getHits()) / reqs << endl
              << "byte hit ratio: " << double(webcache->getBytehits()) / bytes << endl
              << "throughput: " << throughput << endl; //Task 3
+
+        return 0;
     }
+
+
 };

@@ -22,6 +22,7 @@ class processTraceFile {
 public:
     static int processInput(char *inputFile, char *outputMem);
     static int processPopular(char *inputFile, char *inputFile1, char *outputMem);
+    static int processLeastPopular(char *inputFile);
 
     /* struct to contain all the properties of the object*/
     struct Object {
@@ -36,6 +37,12 @@ public:
     struct greaterThanCount {
         inline bool operator()(const Object &struct1, const Object &struct2) {
             return (struct1.count > struct2.count);
+        }
+    };
+
+    struct lesserThanCount {
+        inline bool operator()(const Object &struct1, const Object &struct2) {
+            return (struct1.count < struct2.count);
         }
     };
 };

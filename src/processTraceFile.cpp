@@ -3,6 +3,7 @@
 //
 #include <vector>
 #include <algorithm>
+#include "math.h"
 #include "processTraceFile.h"
 
 /**
@@ -222,5 +223,64 @@ int processTraceFile::processPopular(char *inputFile, char *inputFile1, char *ou
     cout << "completed successfully " << endl;
     cout << "Intersected Objects : " << intersectedObjs << endl;
 
+    return 0;
+}
+
+/**
+ * Process and print out the least popular objects
+ * @param inputFile input trace file
+ * @return 0 on success
+ **/
+int processTraceFile::processLeastPopular(char *inputFile) {
+    /* Vector to hold objects */
+    vector<Object> vec;
+
+    /* Unordered map to hold key-value pair from the input file */
+    unordered_map<string, long> dSimpleId;
+
+    string row;
+    string id;
+    long long t, size;
+
+    ifstream infile1(inputFile);
+
+    /* Read through the trace file */
+    while (infile1 >> t >> id >> size) {
+
+        if (dSimpleId.count(id) == 0) {
+            dSimpleId[id] = 1;
+        } else {
+            dSimpleId[id] += 1;
+        }
+    }
+
+    /* Populate the triple into the vector */
+    for (auto it = dSimpleId.begin(); it != dSimpleId.end(); ++it)
+        vec.push_back(Object(it->first, it->second, 0));
+    dSimpleId.clear();
+
+    /*Vector sorting on the count*/
+    sort(vec.begin(), vec.end(), lesserThanCount());
+
+    /* Print out the number of least popular objects */
+    cout << "Number of Objects requested only : " << endl;
+
+    int i = 0;
+    while (i < 8) {
+        int count = 0;
+        int times = pow(2.0, i);
+        cout << times << " times : ";
+        for (auto it = vec.begin(); it != vec.end(); ++it) {
+            if (it->count == times) {
+                count++;
+            } else if (it->count > times) {
+                i++;
+
+                break;
+            }
+        }
+        cout << count << endl;
+
+    }
     return 0;
 }
