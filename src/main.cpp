@@ -6,12 +6,12 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-     // Check number of parameters
+    // Check number of parameters
 //     if (argc < 3) {
 //          return 1;
 //      }
 
-      cout << "running..." << endl;
+    cout << "running..." << endl;
 
     /**
      * TASK 1
@@ -57,9 +57,17 @@ int main(int argc, char *argv[]) {
      */
 
 
-    processTraceFile::processLeastPopular(argv[1]);
+//    processTraceFile::processLeastPopular(argv[1]);
 
+    /******************************************END OF TASK 4***********************************************************/
 
+    /*
+     * TASK 5
+     * Implement Bloom Filter, update FilterLRU and evaluate
+     **/
+
+    webcachesim cache;
+    cache.cacheSim(argc, argv);
 
     return 0;
 }

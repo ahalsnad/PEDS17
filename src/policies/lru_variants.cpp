@@ -8,7 +8,9 @@
 #include <assert.h>
 #include <random>
 #include <math.h>
+#include <algorithm>
 #include "cache.h"
+#include "MurmurHash3.h"
 
 using namespace std;
 
@@ -323,3 +325,98 @@ protected:
 };
 
 static Factory<ExpLRUCache> factoryExpLRU("ExpLRU");
+
+/* Basic Bloom Filter */
+class BloomFilter {
+public:
+    BloomFilter() {}
+
+    void bloomFilterInsert(long key) {
+        uint64_t out[2];
+
+        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
+
+        uint64_t h1 = out[0];
+        uint64_t h2 = out[1];
+        for (int i = 1; i < k + 1; i++) {
+            uint64_t hash1 = (h1 + i * h2) % l;
+            array[hash1] += 1;
+        }
+    }
+
+    int bloomFilterRetrieve(long key) {
+        uint64_t out[2];
+        uint16_t result[k];
+
+        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
+        uint64_t h1 = out[0];
+        uint64_t h2 = out[1];
+        for (int i = 1; i < k + 1; i++) {
+            uint64_t hash1 = (h1 + i * h2) % l;
+            uint64_t x = array[hash1];
+            result[i - 1] = x;
+        }
+        return *min_element(result, result + k);
+    }
+
+    void setL(int l) {
+        BloomFilter::l = l;
+        array = new u_int16_t[l];
+        for (int i = 0; i < l; i++) {
+            array[i] = 0;
+        }
+    }
+
+    void setK(int k) {
+        BloomFilter::k = k;
+    }
+
+protected:
+    int l, k;
+    uint16_t *array;
+};
+
+
+/* FilterBloomCache (admit only after N requests using basic Bloom Filter)*/
+class FilterBloomCache : public LRUCache {
+public:
+    FilterBloomCache() : npar(2), filter(), LRUCache() {
+    }
+
+    ~FilterBloomCache() {}
+
+    virtual void setPar(string parName, string parValue) {
+        if (parName == "n") {
+            const long long n = stol(parValue);
+            assert(n > 0);
+            npar = n;
+        } else if (parName == "k") {
+            int k = stoi(parValue);
+            assert(k > 0);
+            filter.setK(k);
+        } else if (parName == "l") {
+            int l = stoi(parValue);
+            assert(l > 0);
+            filter.setL(l);
+        } else {
+            cerr << "unrecognized parameter: " << parName << endl;
+        }
+    }
+
+protected:
+    long long npar;
+    BloomFilter filter;
+
+    virtual bool request(const long long cur_req, const long long size) {
+        filter.bloomFilterInsert(cur_req);
+        return (LRUCache::request(cur_req, size));
+    }
+
+    virtual void miss(const long long cur_req, const long long size) {
+        if (filter.bloomFilterRetrieve(cur_req) <= npar)
+            return;
+        LRUCache::miss(cur_req, size);
+    }
+};
+
+static Factory<FilterBloomCache> factoryFilterBloom("FilterBloom");

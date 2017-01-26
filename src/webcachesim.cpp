@@ -18,6 +18,7 @@ public:
             return 1;
         }
 
+        int index = 4;
         // trace properties
         const long warmUp = atol(argv[1]);
         assert(warmUp >= 0);
@@ -31,7 +32,6 @@ public:
         // configure cache size
         const double sizeExp = atof(argv[3]);
         const long long cache_size = pow(2.0, sizeExp);
-        cout << "cache Size : " << cache_size;
         webcache->setSize(cache_size);
 
 
@@ -39,15 +39,31 @@ public:
         regex opexp("(.*)=(.*)");
         cmatch opmatch;
         string paramSummary;
-//  for(int i=5; i<argc; i++) {
-        regex_match(argv[4], opmatch, opexp);
-        if (opmatch.size() != 3) {
-            cerr << "each cacheParam needs to be in form name=value" << endl;
-            return 1;
+
+        if (cacheType == "Filter") {
+            regex_match(argv[4], opmatch, opexp);
+            if (opmatch.size() != 3) {
+                cerr << "each cacheParam needs to be in form name=value" << endl;
+                return 1;
+            }
+            webcache->setPar(opmatch[1], opmatch[2]);
+            paramSummary += opmatch[2];
+            index = 5;
         }
-        webcache->setPar(opmatch[1], opmatch[2]);
-        paramSummary += opmatch[2];
-//  }
+
+        if (cacheType == "FilterBloom") {
+            for (int i = 4; i < 7; i++) {
+                regex_match(argv[i], opmatch, opexp);
+                if (opmatch.size() != 3) {
+                    cerr << "Needs 3 cacheParam: admitValue, noOfHashes and filterLength " << endl;
+                    cerr << "each cacheParam needs to be in form name=value" << endl;
+                    return 1;
+                }
+                webcache->setPar(opmatch[1], opmatch[2]);
+                paramSummary += opmatch[2];
+            }
+            index = 7;
+        }
 
         ifstream infile;
         long long reqs = 0, bytes = 0;
@@ -59,7 +75,7 @@ public:
         cerr << "running..." << endl;
 
         /* Process all the input trace files in LRU */
-        for (int i = 4; i < argc; i++) {
+        for (int i = index; i < argc; i++) {
             const char *path = argv[i];
             bool logStatistics = false;
             long long sub_reqs = 0, sub_bytes = 0;

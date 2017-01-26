@@ -3,4 +3,5 @@ project(SampleProject)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(SampleProject src/main.cpp)
+set(SOURCE_FILES src/webcachesim.cpp src/policies/lru_variants.cpp src/policies/cache.h src/policies/gd_variants.cpp src/processTraceFile.cpp src/processTraceFile.h src/lruCache.h src/main.cpp src/policies/MurmurHash3.cpp src/policies/MurmurHash3.h)
+add_executable(SampleProject ${SOURCE_FILES})
