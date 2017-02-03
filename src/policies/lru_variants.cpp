@@ -331,27 +331,28 @@ class BloomFilter {
 public:
     BloomFilter() {}
 
-    void bloomFilterInsert(long key) {
+    void bloomFilterInsert(long long key) {
         uint64_t out[2];
 
         MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
 
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
-        for (int i = 1; i < k + 1; i++) {
+        for (uint i = 1; i < k + 1; i++) {
             uint64_t hash1 = (h1 + i * h2) % l;
-            array[hash1] += 1;
+            if (array[hash1] < 30)
+                array[hash1] += 1;
         }
     }
 
-    int bloomFilterRetrieve(long key) {
+    int bloomFilterRetrieve(long long key) {
         uint64_t out[2];
         uint16_t result[k];
 
         MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
-        for (int i = 1; i < k + 1; i++) {
+        for (uint i = 1; i < k + 1; i++) {
             uint64_t hash1 = (h1 + i * h2) % l;
             uint64_t x = array[hash1];
             result[i - 1] = x;
@@ -359,20 +360,20 @@ public:
         return *min_element(result, result + k);
     }
 
-    void setL(int l) {
+    void setL(uint l) {
         BloomFilter::l = l;
-        array = new u_int16_t[l];
-        for (int i = 0; i < l; i++) {
+        array = new uint16_t[l];
+        for (uint i = 0; i < l; i++) {
             array[i] = 0;
         }
     }
 
-    void setK(int k) {
+    void setK(uint k) {
         BloomFilter::k = k;
     }
 
 protected:
-    int l, k;
+    uint l, k;
     uint16_t *array;
 };
 
@@ -387,7 +388,7 @@ public:
 
     virtual void setPar(string parName, string parValue) {
         if (parName == "n") {
-            const long long n = stol(parValue);
+            const int n = stoi(parValue);
             assert(n > 0);
             npar = n;
         } else if (parName == "k") {
@@ -404,7 +405,7 @@ public:
     }
 
 protected:
-    long long npar;
+    int npar;
     BloomFilter filter;
 
     virtual bool request(const long long cur_req, const long long size) {

@@ -65,7 +65,7 @@ public:
             index = 7;
         }
 
-        ifstream infile;
+
         long long reqs = 0, bytes = 0;
         long long t, id, size;
 
@@ -74,12 +74,12 @@ public:
 
         cerr << "running..." << endl;
 
-        /* Process all the input trace files in LRU */
+        /* Process all the input trace files */
         for (int i = index; i < argc; i++) {
             const char *path = argv[i];
             bool logStatistics = false;
             long long sub_reqs = 0, sub_bytes = 0;
-
+            ifstream infile;
             infile.open(path);
             while (infile >> t >> id >> size) {
                 // start statistics after warm up
