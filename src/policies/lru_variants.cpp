@@ -334,10 +334,10 @@ public:
     void bloomFilterInsert(long long key) {
         uint64_t out[2];
 
-        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
-
+        MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
+        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
         for (uint i = 1; i < k + 1; i++) {
             uint64_t hash1 = (h1 + i * h2) % l;
             if (array[hash1] < 30)
@@ -349,9 +349,10 @@ public:
         uint64_t out[2];
         uint16_t result[k];
 
-        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
+        MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
+        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
         for (uint i = 1; i < k + 1; i++) {
             uint64_t hash1 = (h1 + i * h2) % l;
             uint64_t x = array[hash1];
@@ -414,7 +415,9 @@ protected:
     }
 
     virtual void miss(const long long cur_req, const long long size) {
-        if (filter.bloomFilterRetrieve(cur_req) <= npar)
+        const auto reqCount = filter.bloomFilterRetrieve(cur_req);
+        std::cerr << "miss " << cur_req << " reqC " << reqCount << std::endl;
+        if (reqCount <= npar)
             return;
         LRUCache::miss(cur_req, size);
     }
