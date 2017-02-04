@@ -334,7 +334,7 @@ public:
     void bloomFilterInsert(long long key) {
         uint64_t out[2];
 
-        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
+        MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
         std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
@@ -349,7 +349,7 @@ public:
         uint64_t out[2];
         uint16_t result[k];
 
-        MurmurHash3_x64_128(&key, 128, 0x6384BA69, &out);
+        MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
         std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
