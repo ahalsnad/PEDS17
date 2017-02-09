@@ -224,7 +224,7 @@ static Factory<S2LRUCache> factoryS2LRU("S2LRU");
 
 class FilterCache : public LRUCache {
 public:
-    FilterCache() : npar(2), LRUCache() {}
+    FilterCache() : npar(2), LRUCache(), reqs(0) {}
 
     ~FilterCache() {}
 
@@ -239,10 +239,14 @@ public:
     }
 
 protected:
+    uint64_t reqs;
     long long npar;
     unordered_map<long long, long long> filter;
 
     virtual bool request(const long long cur_req, const long long size) {
+        reqs++;
+        if(reqs > 10000000)
+            std::cerr << cur_req << " c: " << filter[cur_req] << " s " << size << "\n";
         filter[cur_req]++;
         return (LRUCache::request(cur_req, size));
     }
@@ -337,9 +341,9 @@ public:
         MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
-        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
-        for (uint i = 1; i < k + 1; i++) {
-            uint64_t hash1 = (h1 + i * h2) % l;
+        //        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
+        for (uint i = 0; i < k; i++) {
+            uint hash1 = (h1 + i * h2) % l;
             if (array[hash1] < 30)
                 array[hash1] += 1;
         }
@@ -347,23 +351,24 @@ public:
 
     int bloomFilterRetrieve(long long key) {
         uint64_t out[2];
-        uint16_t result[k];
+        uint8_t result[k];
 
         MurmurHash3_x64_128(&key, sizeof(key), 0x6384BA69, &out);
         uint64_t h1 = out[0];
         uint64_t h2 = out[1];
-        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
-        for (uint i = 1; i < k + 1; i++) {
-            uint64_t hash1 = (h1 + i * h2) % l;
-            uint64_t x = array[hash1];
-            result[i - 1] = x;
+        uint8_t minCount = 30; // maxcount see line 347 above
+        //        std::cerr << "key " << key << " h1 " << h1 << " h2 " << h2 << std::endl;
+        for (uint i = 0; i < k; i++) {
+            const uint hash1 = (h1 + i * h2) % l;
+            const uint8_t x = array[hash1];
+            minCount = x < minCount ? x : minCount;
         }
-        return *min_element(result, result + k);
+        return minCount;
     }
 
     void setL(uint l) {
         BloomFilter::l = l;
-        array = new uint16_t[l];
+        array = new uint8_t[l];
         for (uint i = 0; i < l; i++) {
             array[i] = 0;
         }
@@ -375,14 +380,14 @@ public:
 
 protected:
     uint l, k;
-    uint16_t *array;
+    uint8_t *array;
 };
 
 
 /* FilterBloomCache (admit only after N requests using basic Bloom Filter)*/
 class FilterBloomCache : public LRUCache {
 public:
-    FilterBloomCache() : npar(2), filter(), LRUCache() {
+    FilterBloomCache() : npar(2), filter(), LRUCache(), reqs(0) {
     }
 
     ~FilterBloomCache() {}
@@ -406,17 +411,22 @@ public:
     }
 
 protected:
+    uint64_t reqs;
     int npar;
     BloomFilter filter;
 
     virtual bool request(const long long cur_req, const long long size) {
+        reqs++;
+        if(reqs > 10000000) {
+            const auto reqCount = filter.bloomFilterRetrieve(cur_req);
+            std::cerr << cur_req << " c: " << reqCount << " s " << size << "\n";
+        }
         filter.bloomFilterInsert(cur_req);
         return (LRUCache::request(cur_req, size));
     }
 
     virtual void miss(const long long cur_req, const long long size) {
         const auto reqCount = filter.bloomFilterRetrieve(cur_req);
-        std::cerr << "miss " << cur_req << " reqC " << reqCount << std::endl;
         if (reqCount <= npar)
             return;
         LRUCache::miss(cur_req, size);
