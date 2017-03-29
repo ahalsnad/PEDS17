@@ -64,7 +64,8 @@ a). Research bloom filters and counting bloom filters
 b). Implement a bloom filter to solve the overhead problem
 - Incorporate bloom filter into your filter
 - Evaluate memory overhead and hit ratio for different parameters
-      - Start with l=1MB and n=8
-      - Also check
-      i. l=512KB, 2MB, 4MB, 8MB
-      ii. n=4, n=16, n=32
+
+Start with l=1MB and n=8
+- Also check
+     i. l=512KB, 2MB, 4MB, 8MB
+     ii. n=4, n=16, n=32
