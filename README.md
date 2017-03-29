@@ -35,10 +35,10 @@ a). Evaluate common caching policies
 - Measure Object/Byte Hit ratio
 - Measure throughput: how many requests per second is each policy able to process? 
 
-b)- Literature research: Some more cache policies
+b). Literature research: Some more cache policies
 
 
-<h3>task 4: </h3>
+<h3>Task 4: </h3>
 
 a). Quantify the problem of one-hit-wonders:
 - How many requests go to objects that are only ever requested once
@@ -63,4 +63,8 @@ a). Research bloom filters and counting bloom filters
 
 b). Implement a bloom filter to solve the overhead problem
 - Incorporate bloom filter into your filter
-- Evaluate effects of change
+- Evaluate memory overhead and hit ratio for different parameters
+      - Start with l=1MB and n=8
+      - Also check
+      i. l=512KB, 2MB, 4MB, 8MB
+      ii. n=4, n=16, n=32
