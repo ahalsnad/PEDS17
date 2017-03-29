@@ -70,4 +70,6 @@ Start with l=1MB and n=8
 - Also check
  
  i). l=512KB, 2MB, 4MB, 8MB
+ 
+ 
  ii). n=4, n=16, n=32
