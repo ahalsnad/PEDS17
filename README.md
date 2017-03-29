@@ -1,5 +1,6 @@
 # PEDS17
 Project: Performance Evaluation of Distributed Systems
+
 https://disco.informatik.uni-kl.de/index.php/teaching/project
 
 <h3> Task 1: </h3>
@@ -36,8 +37,30 @@ a). Evaluate common caching policies
 
 b)- Literature research: Some more cache policies
 
+
 <h3>task 4: </h3>
 
+a). Quantify the problem of one-hit-wonders:
+- How many requests go to objects that are only ever requested once
+- .. only ever requested twice
+- ... only ever requested four times
+- ... only ever requested 8, 16, 32, 64, 128 times.
+
+
+b). Evaluate the FILTER policy to fight the one-hit-wonders problem
+- When a miss happens: FILTER admits only if this object has received N requests so far
+- For admitted objects: standard LRU policy
+- Evaluate hit ratios and throughput
+- Analyze throughput and memory consumption
+
+Memory Consumption: Used memusg script which measures peak memory usage 
+- https://github.com/jhclark/memusg
 
 
 <h3>Task 5: </h3>
+
+a). Research bloom filters and counting bloom filters
+
+b). Implement a bloom filter to solve the overhead problem
+- Incorporate bloom filter into your filter
+- Evaluate effects of change
